@@ -162,21 +162,10 @@ Then open these URLS to view the template
 * ```/yourdomain.com/barua/debug/forgot_password```
 * ```/yourdomain.com/barua/debug/payment_confirmation```
 
-Example route from ``` routes/web.php ```
+<br />
 
-```php
-Route::get('barua/debug/welcome_user', function () use ($mailBuilder, $user) {
-    return new WelcomeUser(barua: $mailBuilder, user: $user, data: [
-        'urls' => [
-            'unsubscribe' => 'http://domain.com/unsubscribe',
-            'play'        => 'http://domain.com/playstore',
-            'ios'         => 'http://domain.com/iostore',
-            'refer'       => 'http://domain.com/refe',
-            'webview'     => 'http://domain.com/webview',
-        ],
-    ]);
-});
-```
+---
+
 
 ## Screenshots
 
