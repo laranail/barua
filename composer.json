@@ -1,0 +1,78 @@
+{
+  "name": "laranail/barua",
+  "description": "Effortlessly design and send stunning, responsive emails with customizable components.",
+  "keywords": ["laravel", "views", "email", "components", "php", "toolkit"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Imani Manyara",
+      "homepage": "https://simtabi.com/",
+      "email": "imani@simtabi.com"
+    }
+  ],
+  "scripts": {
+    "test:stan": ["vendor/bin/phpstan analyse --memory-limit=3G"],
+    "lint": ["vendor/bin/pint --test"],
+    "lint:fix": ["vendor/bin/pint -v"],
+    "test": "pest --colors=always",
+    "ci": [
+      "@lint",
+      "@test:stan",
+      "@test"
+    ]
+  },
+  "scripts-descriptions": {
+    "lint:fix": "Run Laravel Pint code styling.",
+    "lint": "Run Laravel Pint code styling check.",
+    "test:stan": "Run PHPStan against code base.",
+    "test": "Run test suite."
+  },
+  "require": {
+    "php": "^8.1|^8.2|^8.3",
+    "ext-fileinfo": "*",
+    "ext-libxml": "*",
+    "ext-dom": "*",
+    "illuminate/support": "^9.0|^10.0|^11.0",
+    "illuminate/view": "^9.0|^10.0|^11.0",
+    "pelago/emogrifier": "^3.0|^4.0|^5.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+    "jamesbwi/blade-svg": "^0.1.5"
+  },
+  "require-dev": {
+    "mockery/mockery": "^1.6.6",
+    "orchestra/testbench": "^7.0|^8.0",
+    "phpstan/phpstan": "^1.10.42",
+    "laravel/pint": "^1.13.6",
+    "pestphp/pest": "^2.0.0",
+    "phpunit/phpunit": "^9|^10"
+  },
+  "autoload": {
+    "psr-4": {
+      "Simtabi\\Laranail\\Barua\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Simtabi\\Laranail\\Barua\\Providers\\BaruaServiceProvider"
+      ],
+      "aliases": {
+        "Barua": "Simtabi\\Laranail\\Barua\\Facades\\BaruaFacade"
+      }
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "preferred-install": "dist",
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

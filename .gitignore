@@ -1,0 +1,12 @@
+node_modules/
+.parcel-cache/
+.cache
+dist
+public
+/vendor
+composer.phar
+composer.lock
+package-lock.json
+.DS_Store
+src/styles/.sass-cache/*
+/__dev
