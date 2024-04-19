@@ -180,17 +180,7 @@ Route::get('barua/debug/welcome_user', function () use ($mailBuilder, $user) {
 
 ## Screenshots
 
-<style>
-    .screenshot {
-        width: 50%;
-        height: auto; /* Maintain aspect ratio */
-        border-radius: 8px; /* Rounded corners */
-        margin: 10px auto;
-    }
-</style>
-
-
 <div align="left">
-   <img src="../.github/assets/demos/welcome_user.png" alt="Screenshot" class="screenshot">
+   <img src="../.github/assets/demos/welcome_user.png" alt="Screenshot" style="width: 50%; height: auto; border-radius: 8px; margin: 10px auto;">
    <br />
 </div>

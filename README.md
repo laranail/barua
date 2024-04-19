@@ -1,14 +1,5 @@
-<style>
-    .banner-image {
-        width: 100%; /* Full-width */
-        height: auto; /* Maintain aspect ratio */
-        border-radius: 8px; /* Rounded corners */
-        margin: 10px auto;
-    }
-</style>
-
 <div align="center">
-   <img src=".github/assets/banner.png" alt="Barua Banner" class="banner-image">
+   <img src=".github/assets/banner.png" alt="Barua Banner" style="width: 100%; height: auto; border-radius: 8px; margin: 10px auto;">
    <br />
 </div>
 
