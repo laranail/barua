@@ -170,23 +170,22 @@ composer ci
 <hr>
 
 ### Changelog
-Please see [CHANGELOG](.github/docs/CHANGELOG.md) for more information on what has changed recently.
+Please see [CHANGELOG](./.github/docs/CHANGELOG.md) for more information on what has changed recently.
 
 ### Contributing
-Please see [CONTRIBUTING](.github/docs/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](./.github/docs/CONTRIBUTING.md) for details.
 
 ### Security
-Please see [SECURITY](.github/docs/SECURITY.md) for details.
+Please see [SECURITY](./.github/docs/SECURITY.md) for details.
 
 ### Support
-Please see [Support and Community](.github/docs/SUPPORT.md) for details.
+Please see [Support and Community](./.github/docs/SUPPORT.md) for details.
 
 ### Contributors
-Please see [CONTRIBUTORS](.github/docs/CONTRIBUTORS.md) for details.
+Please see [CONTRIBUTORS](./.github/docs/CONTRIBUTORS.md) for details.
 
 ### Authors
 - Imani ([@imanimanyara](https://twitter.com/imanimanyara))
 
 ### License
-Open-sourced software licensed under the MIT license. Please see [LICENSE](.github/docs/LICENSE) for details.
-
+Open-sourced software licensed under the MIT license. Please see [LICENSE](./.github/docs/LICENSE) for details.
