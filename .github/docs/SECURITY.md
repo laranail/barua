@@ -15,4 +15,4 @@ We encourage all users to run the latest, supported version of the software to e
 
 We take the security of our projects seriously. If you believe you have found a security vulnerability within our software, we encourage you to report it to us as quickly as possible. We welcome reports from everyone, including security researchers, developers, and our user community.
 
-To report a security issue, please email [security@simtabi.com](mailto:security@simtabi.com).
+If you discover any security related issues, please email us at [security@simtabi.com](mailto:security@simtabi.com) instead of using the issue tracker.

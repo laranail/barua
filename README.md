@@ -8,7 +8,8 @@
 </div>
 <div align="center">
 <p>
-The next generation of writing emails.<br />High-quality, un-styled components for creating emails.</p>
+The next generation of writing emails.<br />High-quality, un-styled components for creating emails.
+</p>
 </div>
 <div align="center">
    <a href="https://simtabi.com">Website</a> 
@@ -29,10 +30,15 @@ The next generation of writing emails.<br />High-quality, un-styled components f
    - [Prerequisites](#prerequisites)
    - [Installation](#installation-and-configuration)
 3. [Email Components](docs/email-components.md)
-5. [Contributing](CONTRIBUTING.md)
-6. [License](LICENSE.md)
-6. [Changelog](CHANGELOG.md)
-7. [Support and Community](SUPPORT.md)
+6. [License](#license)
+7. [Changelog](#changelog)
+8. [Contributing](#contributing)
+9. [Security](#security)
+10. [Support](#support)
+11. [Contributors](#contributors)
+12. [Authors](#authors)
+13. [License](#license)
+
 
 <br>
 <hr>
@@ -160,10 +166,27 @@ composer install
 composer ci
 ```
 
-## Authors
+<br>
+<hr>
 
+### Changelog
+Please see [CHANGELOG](.github/docs/CHANGELOG.md) for more information on what has changed recently.
+
+### Contributing
+Please see [CONTRIBUTING](.github/docs/CONTRIBUTING.md) for details.
+
+### Security
+Please see [SECURITY](.github/docs/SECURITY.md) for details.
+
+### Support
+Please see [Support and Community](.github/docs/SUPPORT.md) for details.
+
+### Contributors
+Please see [CONTRIBUTORS](.github/docs/CONTRIBUTORS.md) for details.
+
+### Authors
 - Imani ([@imanimanyara](https://twitter.com/imanimanyara))
 
-## License & Copyright
+### License
+Open-sourced software licensed under the MIT license. Please see [LICENSE](.github/docs/LICENSE) for details.
 
-Made with ❤️ by [Simtabi](https://simtabi.com). Open-sourced software licensed under the MIT license.
