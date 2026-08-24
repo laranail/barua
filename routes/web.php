@@ -39,7 +39,7 @@ if (Helpers::isDevModeEnable()) {
         'unsubscribeLink'  => 'https://simtabi.com',
     ];
 
-    Route::prefix('barua/debug')->name('barua.debug.')->group(function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
+    Route::prefix('barua/debug')->name('laranail.barua.debug.')->group(function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
 
         Route::get('/', function () use ($data) {
             return view(Helpers::getViewPath('home'), array_merge([
@@ -53,7 +53,7 @@ if (Helpers::isDevModeEnable()) {
 
             // Route when template is not provided
             Route::get('/', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-                return redirect()->route('barua.debug.home');
+                return redirect()->route('laranail.barua.debug.home');
             });
 
             // Route when template is provided

@@ -38,6 +38,12 @@ class BaruaServiceProvider extends ServiceProvider
 
     private const string PROJECT_NAME = 'barua';
 
+    /** Views, translations and the Blade component prefix — org shape. */
+    private const string VENDORED_NAMESPACE = 'laranail-barua';
+
+    /** The flat org config key. */
+    private const string CONFIG_KEY = 'laranail.barua';
+
 
     /**
      * Get the services provided by the provider.
@@ -54,10 +60,10 @@ class BaruaServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom($this->getPath('config/barua.php'), $this->getNamespace());
+        $this->mergeConfigFrom($this->getPath('config/barua.php'), self::CONFIG_KEY);
 
         $this->app->singleton(CssInlinerPlugin::class, function ($app) {
-            return new CssInlinerPlugin($app['config']->get($this->getNamespace() . '.stylesheets', []));
+            return new CssInlinerPlugin($app['config']->get(self::CONFIG_KEY . '.stylesheets', []));
         });
 
         Event::listen(MessageSending::class, CssInlinerPlugin::class);
@@ -99,14 +105,16 @@ class BaruaServiceProvider extends ServiceProvider
     protected function bootPublishing(): static
     {
 
+        // Publish tags follow the org command-style shape: the registry
+        // resolves exact names, so `laranail::barua-config` is collision-proof.
         $getPrefix = function ($name) {
-            return $this->getNamespace() . "::" . $name;
+            return 'laranail::' . self::PROJECT_NAME . '-' . $name;
         };
 
         if ($this->app->runningInConsole()) {
 
             $this->publishes([
-                $this->getPath('config/barua.php') => $this->app->configPath($this->getNamespace().'.php'),
+                $this->getPath('config/barua.php') => $this->app->configPath('laranail/barua.php'),
             ], $getPrefix('config'));
 
             $this->publishes([
@@ -148,7 +156,7 @@ class BaruaServiceProvider extends ServiceProvider
      */
     protected function bootComponents(): static
     {
-        $this->loadViewComponentsAs(self::PROJECT_NAME, [
+        $this->loadViewComponentsAs(self::VENDORED_NAMESPACE, [
             Head::class,
             Body::class,
             Html::class,
@@ -170,7 +178,7 @@ class BaruaServiceProvider extends ServiceProvider
 
     private function getNamespace(?string $name = null): string
     {
-        return !empty($name) ? self::PROJECT_NAME . '-' . ltrim($name, '-') : self::PROJECT_NAME;
+        return !empty($name) ? self::VENDORED_NAMESPACE . '-' . ltrim($name, '-') : self::VENDORED_NAMESPACE;
     }
 
     private function getPath(?string $path = null): string

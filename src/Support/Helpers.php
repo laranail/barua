@@ -32,32 +32,32 @@ class  Helpers
 
     public static function isDevModeEnable(): bool
     {
-        return config('barua.dev_mode', false);
+        return config('laranail.barua.dev_mode', false);
     }
 
     public static function isSendMailEnabled(): bool
     {
-        return config('barua.enable_send_mail', true);
+        return config('laranail.barua.enable_send_mail', true);
     }
 
     public static function isThrowErrors(): bool
     {
-        return config('barua.throw_errors', false);
+        return config('laranail.barua.throw_errors', false);
     }
 
     public static function getDefaultMaximumFileSize(): bool
     {
-        return config('barua.max_file_size', false);
+        return config('laranail.barua.max_file_size', false);
     }
 
     public static function getAllowedMimeTypes(): array
     {
-        return config('barua.allowed_mime_types', []);
+        return config('laranail.barua.allowed_mime_types', []);
     }
 
     public static function getSender(): object
     {
-        $data = config('barua.sender', []);
+        $data = config('laranail.barua.sender', []);
 
         return (object) [
             'email' => $data['email'] ?? null,
@@ -72,7 +72,7 @@ class  Helpers
     {
 
         // Retrieve the user class from the configuration.
-        $configKey = 'barua.user_class';
+        $configKey = 'laranail.barua.user_class';
         $userClass = config($configKey);
 
         // Ensure the class name is retrieved and is a string.

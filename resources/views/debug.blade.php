@@ -162,7 +162,7 @@
                                         <tbody>
                                         <tr>
                                             <td style="line-height: 24px; font-size: 16px; margin: 0;" align="left">
-                                                <x-barua-img :src="Barua::asset('img/empty-state.svg')" style="margin: 20px auto 0;" alt="image" width="120" height="120"/>
+                                                <x-laranail-barua-img :src="Barua::asset('img/empty-state.svg')" style="margin: 20px auto 0;" alt="image" width="120" height="120"/>
                                             </td>
                                         </tr>
                                         </tbody>

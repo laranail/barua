@@ -57,7 +57,7 @@
                                             A simple welcome email template for new users.
                                         </p>
                                         <footer>
-                                            <a href="{{route('barua.debug.welcome_user')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
+                                            <a href="{{route('laranail.barua.debug.welcome_user')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
                                         </footer>
                                     </section>
                                 </div>
@@ -76,7 +76,7 @@
                                             A simple email template for verifying user email addresses.
                                         </p>
                                         <footer>
-                                            <a href="{{route('barua.debug.verify_email')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
+                                            <a href="{{route('laranail.barua.debug.verify_email')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
                                         </footer>
                                     </section>
                                 </div>
@@ -95,7 +95,7 @@
                                             A simple email template for resetting user passwords.
                                         </p>
                                         <footer>
-                                            <a href="{{route('barua.debug.forgot_password')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
+                                            <a href="{{route('laranail.barua.debug.forgot_password')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
                                         </footer>
                                     </section>
                                 </div>
@@ -114,7 +114,7 @@
                                             A simple email template for confirming payments.
                                         </p>
                                         <footer>
-                                            <a href="{{route('barua.debug.payment_confirmation')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
+                                            <a href="{{route('laranail.barua.debug.payment_confirmation')}}" class="font-semibold link-primary stretched-link">Check it out -></a>
                                         </footer>
                                     </section>
                                 </div>
