@@ -11,7 +11,7 @@
     "glob": "^10.3.12",
     "laravel-vite-plugin": "^3.2",
     "postcss": "^8.4.38",
-    "postcss-custom-properties": "^13.3.7",
+    "postcss-custom-properties": "^15.0.1",
     "rollup-plugin-copy": "^3.5.0",
     "sass": "^1.75.0",
     "sass-loader": "^17.0.0",
