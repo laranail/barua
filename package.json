@@ -9,7 +9,7 @@
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
     "glob": "^10.3.12",
-    "laravel-vite-plugin": "^1.0",
+    "laravel-vite-plugin": "^3.2",
     "postcss": "^8.4.38",
     "postcss-custom-properties": "^13.3.7",
     "rollup-plugin-copy": "^3.5.0",
