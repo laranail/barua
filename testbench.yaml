@@ -1,0 +1,5 @@
+laravel: '@testbench'
+
+providers:
+  - Simtabi\Laranail\Package\Tools\Providers\PackageToolsServiceProvider
+  - Simtabi\Laranail\Barua\Providers\BaruaServiceProvider

@@ -424,3 +424,5 @@ Thumbs.db
 /__dev
 
 ############################### End of Project Specific Config ###
+# Pest / PHPUnit cache
+/.phpunit.cache/

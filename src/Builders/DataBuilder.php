@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Builders;
 
@@ -8,15 +10,19 @@ use Simtabi\Laranail\Barua\Support\TextFormatter;
 
 class DataBuilder
 {
-
+    /**
+     * @var array<string, mixed>
+     */
     protected array $data = [];
 
+    /**
+     * @var list<list<string>|string>
+     */
     protected array|string $variables = [];
 
-    public function __construct()
-    {
-    }
-
+    /**
+     * @param list<string>|string $variables names such as "[name], [email]", or a list of them
+     */
     public function setVariables(array|string $variables): static
     {
         // string can be [kimani], or {{kimani}}
@@ -24,21 +30,20 @@ class DataBuilder
             $variables = TextFormatter::commaSeparatedStringToArray($variables);
         }
 
-        if (!is_array($variables)) {
-            $variables = [$variables]; // Ensures everything added to variables is an array
-        }
-
         $this->variables[] = $variables;
 
         return $this;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getVariables(): array
     {
         $result = [];
 
         // Recursive function to flatten the array
-        $flatten = function ($items) use (&$result, &$flatten) {
+        $flatten = function ($items) use (&$result, &$flatten): void {
             foreach ($items as $item) {
                 if (is_array($item)) {
                     $flatten($item);
@@ -54,6 +59,9 @@ class DataBuilder
         return $result;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getFormattedVariables(): array
     {
         return TextFormatter::extractEnclosedText(implode(',', $this->getVariables()));
@@ -65,12 +73,12 @@ class DataBuilder
      *
      * @param array $data The data to be set, either as a key-value pair or a list of values.
      * @param string|null $keyPath The dot-notated path to place the data (e.g., 'key1.key2').
-     * @return static
+     * @param array<string, mixed> $data
      */
     public function setData(array $data, ?string $keyPath = null): static
     {
 
-        if (!empty($keyPath)) {
+        if (! empty($keyPath)) {
             $this->data = Helpers::setNestedData(data: $this->data, keys: explode('.', $keyPath), value: $data);
         } else {
             $this->data = array_merge($this->data, $data);
@@ -84,16 +92,17 @@ class DataBuilder
      * Returns null if any part of the path is invalid.
      *
      * @param string|null $keyPath Dot-notated path for the data (e.g., 'key1.key2').
+     *
      * @return mixed Data at the specified path or null if path is invalid.
      */
     public function getData(?string $keyPath = null): mixed
     {
         $mapVariables = function (array $data): array {
             $variables = $this->getFormattedVariables();
-            $result    = [];
+            $result = [];
 
             // Validate that getVariables returned a non-empty array of strings
-            if (empty($variables)) {
+            if ($variables === []) {
                 return $result;
             }
 
@@ -117,7 +126,7 @@ class DataBuilder
         $temp = $this->data;
 
         foreach ($keys as $key) {
-            if (!isset($temp[$key])) {
+            if (! isset($temp[$key])) {
                 return null; // Return null if the key is not found at any level.
             }
 
@@ -135,5 +144,4 @@ class DataBuilder
             subject: $this->data['logo']['path'] ?? '',
         );
     }
-
 }

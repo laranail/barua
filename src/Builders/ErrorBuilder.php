@@ -1,14 +1,18 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Builders;
 
 use Illuminate\Support\Facades\Log;
-use Simtabi\Laranail\Barua\Exceptions\BaruaException;
 use Simtabi\Laranail\Barua\Support\Helpers;
+use Simtabi\Laranail\Barua\Exceptions\BaruaException;
 
 class ErrorBuilder
 {
-
+    /**
+     * @var array<string, list<string>>
+     */
     protected array $errors = [];
 
     public function __construct()
@@ -17,16 +21,13 @@ class ErrorBuilder
     }
 
     /**
-     * @param string|null $error
-     * @param string $key
-     * @return static
      * @throws BaruaException
      */
     public function setErrors(?string $error, string $key): static
     {
-        if (!empty($error)) {
+        if (! empty($error)) {
             // Check if the key already exists and has data
-            if (isset($this->errors[$key]) && !empty($this->errors[$key])) {
+            if (isset($this->errors[$key]) && ! empty($this->errors[$key])) {
                 // The key exists and has data, so we append the error to the existing array
                 $this->errors[$key][] = $error;
             } else {
@@ -44,13 +45,15 @@ class ErrorBuilder
         return $this;
     }
 
+    /**
+     * @return ($key is null ? array<string, list<string>> : list<string>)
+     */
     public function getErrors(?string $key = null): array
     {
-        if (!empty($key)) {
+        if (! empty($key)) {
             return $this->errors[$key] ?? [];
         }
 
         return $this->errors;
     }
-
 }

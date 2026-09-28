@@ -1,61 +1,53 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Simtabi\Laranail\Barua\Builders\DataBuilder;
-use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
-use Simtabi\Laranail\Barua\Builders\MailBuilder;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Queue\InteractsWithQueue;
 use Simtabi\Laranail\Barua\Enums\ViewType;
-use Simtabi\Laranail\Barua\Exceptions\BaruaException;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Simtabi\Laranail\Barua\Support\Helpers;
+use Simtabi\Laranail\Barua\Builders\DataBuilder;
+use Simtabi\Laranail\Barua\Builders\MailBuilder;
+use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
+use Simtabi\Laranail\Barua\Exceptions\BaruaException;
 
-class MailBase extends Mailable implements ShouldQueue
+/**
+ * Base for barua's mailables.
+ *
+ * Not ShouldQueue: that made every barua mailable queue even when sent with
+ * `sendEmail(queued: false)` or `Mail::send()`. Queue explicitly instead, with
+ * `sendEmail(queued: true)` or `Mail::queue()`; Queueable keeps that working.
+ */
+class MailBase extends Mailable
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected Model|null $user;
+    protected ?Model $user = null;
 
-    protected ErrorBuilder $errorBuilder;
+    protected ?ViewType $viewType;
 
-    protected MailBuilder $mailBuilder;
-
-    protected DataBuilder $dataBuilder;
-
-    protected ViewType|null $viewType;
-
-    protected string $className;
-
+    /**
+     * @var array{subject?: string, view?: string}
+     */
     protected array $options = [];
 
     /**
      * Create a new message instance.
-     *
-     * @param MailBuilder $mailBuilder
-     * @param ErrorBuilder $errorBuilder
-     * @param string $className
-     * @param DataBuilder $dataBuilder
      */
-    public function __construct(MailBuilder $mailBuilder, DataBuilder $dataBuilder, ErrorBuilder $errorBuilder, string $className)
+    public function __construct(protected MailBuilder $mailBuilder, protected DataBuilder $dataBuilder, protected ErrorBuilder $errorBuilder, protected string $className)
     {
-        $this->mailBuilder  = $mailBuilder;
-        $this->errorBuilder = $errorBuilder;
-        $this->dataBuilder  = $dataBuilder;
-        $this->className    = $className;
-
-        $this->viewType     = $this->mailBuilder->getViewType() ?? ViewType::HTML;
+        $this->viewType = $this->mailBuilder->getViewType() ?? ViewType::HTML;
     }
 
     /**
      * Build the message.
      *
-     * @return Mailable|bool
      * @throws BaruaException
      */
     public function build(): Mailable|bool
@@ -66,7 +58,7 @@ class MailBase extends Mailable implements ShouldQueue
             errorBuilder: $this->errorBuilder,
             className: $this->className,
             viewType: $this->viewType,
-            dataBuilder: $this->dataBuilder
+            dataBuilder: $this->dataBuilder,
         );
     }
 
@@ -77,7 +69,7 @@ class MailBase extends Mailable implements ShouldQueue
         return $this;
     }
 
-    public function getSubject(): string|null
+    public function getSubject(): ?string
     {
         return $this->options['subject'] ?? null;
     }
@@ -89,9 +81,8 @@ class MailBase extends Mailable implements ShouldQueue
         return $this;
     }
 
-    public function getView(): string|null
+    public function getView(): ?string
     {
         return $this->options['view'] ?? null;
     }
-
 }

@@ -1,32 +1,23 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Listeners;
 
-
 use Illuminate\Support\Facades\Log;
-use Simtabi\Laranail\Barua\Events\FailedMailEvent;
+use Simtabi\Laranail\Barua\Events\SendMailDisabled;
 
-class LogSendMailDisabled
+/**
+ * Logs what happened, never the template data: that carries password-reset and
+ * verification links and personal details, which do not belong in a log.
+ */
+final class LogSendMailDisabled
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
+    public function handle(SendMailDisabled $event): void
     {
-        //
-    }
-
-    /**
-     * Handle the event.
-     */
-    public function handle(FailedMailEvent $event): void
-    {
-        $errorBuilder = $event->errorBuilder;
-        $mailBuilder  = $event->mailBuilder;
-        $dataBuilder  = $event->dataBuilder;
-        $mailable     = $event->mailable;
-        $exception    = $event->exception;
-
-        Log::error("Email failed to send", ['recipient' => $mailBuilder->getRecipients(), 'data' => $dataBuilder->getData(), 'error' => $exception->getMessage()]);
+        Log::notice('laranail/barua: mail not sent, sending is disabled.', [
+            'mailable'   => $event->mailable::class,
+            'recipients' => array_sum(array_map(count(...), $event->mailBuilder->getRecipients())),
+        ]);
     }
 }

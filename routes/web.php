@@ -1,142 +1,76 @@
-<?php declare(strict_types=1);
+<?php
 
-use Illuminate\Database\Eloquent\Model;
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Contracts\View\Factory;
+use Simtabi\Laranail\Barua\Support\Helpers;
+use Simtabi\Laranail\Barua\Services\MailSender;
 use Simtabi\Laranail\Barua\Builders\DataBuilder;
-use Simtabi\Laranail\Barua\Mail\DebugEmail;
-use Simtabi\Laranail\Barua\Mail\Messages\Onboarding\ForgotPassword;
-use Simtabi\Laranail\Barua\Mail\Messages\Marketing\PaymentConfirmation;
+use Simtabi\Laranail\Barua\Builders\MailBuilder;
+use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
 use Simtabi\Laranail\Barua\Mail\Messages\Onboarding\VerifyEmail;
 use Simtabi\Laranail\Barua\Mail\Messages\Onboarding\WelcomeUser;
-use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
-use Simtabi\Laranail\Barua\Builders\MailBuilder;
-use Simtabi\Laranail\Barua\Services\MailSender;
-use Simtabi\Laranail\Barua\Support\Helpers;
+use Simtabi\Laranail\Barua\Mail\Messages\Onboarding\ForgotPassword;
+use Simtabi\Laranail\Barua\Mail\Messages\Marketing\PaymentConfirmation;
 
-if (Helpers::isDevModeEnable()) {
+/*
+| Debug pages for the bundled templates. Loaded by the provider only when
+| `laranail.barua.dev_mode` is on and the environment is `local`.
+|
+| Each page renders its template. It sends it only with `?send=1`, to the first
+| row of `laranail.barua.user_class`, or to the configured sender when there is
+| none. Nothing is queried until a page is requested.
+*/
 
-    // get user model
-    $user = Helpers::getUserModel();
-    /** @var Model|string $user */
-    $user = $user::first();
+$sample = [
+    'name'             => 'Mogaka',
+    'serviceName'      => 'Barua',
+    'productName'      => 'Barua',
+    'companyName'      => 'Simtabi',
+    'productOrService' => 'Barua Email Kit',
+    'solutionOrOffer'  => 'Barua Email Kit',
+    'unsubscribeLink'  => 'https://example.com/unsubscribe',
+];
 
-    // init mail builder classes
-    $errorBuilder = new ErrorBuilder();
-    $dataBuilder  = (new DataBuilder())->setVariables('[name], [email], [phone], [package],[price], [method],[note]');
-    $mailBuilder  = (new MailBuilder(errorBuilder: $errorBuilder))->setTo(email: $user->email, name: $user->name);
+$templates = [
+    'welcome_user'         => [WelcomeUser::class, ['verification_link' => 'https://example.com/verify']],
+    'verify_email'         => [VerifyEmail::class, ['verification_link' => 'https://example.com/verify']],
+    'forgot_password'      => [ForgotPassword::class, ['reset_link' => 'https://example.com/reset']],
+    'payment_confirmation' => [PaymentConfirmation::class, ['invoice_id' => '407878364', 'invoice_total' => '160.69', 'download_link' => 'https://example.com/invoice']],
+];
 
-    // queued and delay configurations
-    $queued = false;
-    $delay  = null;
-    $data   = [
-        'name'        => 'Mogaka',
-        'serviceName' => 'Barua',
-        'productName' => 'Barua',
-        'companyName' => 'Simtabi',
-        'productOrService' => 'Barua Email Kit',
-        'solutionOrOffer'  => 'Barua Email Kit',
-        'unsubscribeLink'  => 'https://simtabi.com',
-    ];
+$preview = static function (Request $request, string $mailable, array $data): mixed {
+    $recipient = Helpers::getSender();
 
-    Route::prefix('barua/debug')->name('laranail.barua.debug.')->group(function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
+    $userClass = Helpers::getUserModel();
+    $user = $userClass::query()->first();
 
-        Route::get('/', function () use ($data) {
-            return view(Helpers::getViewPath('home'), array_merge([
-                'title' => 'Barua Debug',
-                'description' => 'This is a debug page for Barua package',
-            ], $data));
-        })->name('home');
+    $errorBuilder = new ErrorBuilder;
+    $dataBuilder = (new DataBuilder)->setData($data);
+    $mailBuilder = new MailBuilder(errorBuilder: $errorBuilder)->setTo(
+        email: (string) ($user->email ?? $recipient->email),
+        name: $user->name ?? $recipient->name,
+    );
 
+    $message = new $mailable(mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder);
 
-        Route::prefix('preview')->group(function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data){
+    return new MailSender(mailable: $message, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder)
+        ->setSendMail($request->boolean('send'))
+        ->sendEmail();
+};
 
-            // Route when template is not provided
-            Route::get('/', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-                return redirect()->route('laranail.barua.debug.home');
-            });
+Route::prefix('barua/debug')->name('laranail-barua.debug.')->group(static function () use ($sample, $templates, $preview): void {
+    Route::get('/', static fn (): Factory|View => view(Helpers::getViewPath('home'), [
+        'title'       => 'Barua Debug',
+        'description' => 'Preview pages for the templates barua ships.',
+        ...$sample,
+    ]))->name('home');
 
-            // Route when template is provided
-            Route::get('/{template}/{send?}', function (Request $request, $template) use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-
-                // Retrieve the 'send' query parameter and set default as false if not provided
-                $sendMail = $request->query('send', 'false');
-
-                if (!empty($template)) {
-                    $template = trim($template);
-                }
-
-                if (!empty($sendMail)) {
-                    $sendMail = filter_var(trim($sendMail), FILTER_VALIDATE_BOOLEAN);
-                }
-
-                // Create the mailable instance
-                $mailable = (new DebugEmail(
-                    mailBuilder: $mailBuilder,
-                    dataBuilder: $dataBuilder->setData(data: $data),
-                    errorBuilder: $errorBuilder
-                ))->setView(view: $template);
-
-                return (new MailSender(mailable: $mailable, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder))->setSendMail($sendMail)->sendEmail(queued: $queued, delay: $delay);
-
-            })->where('template', '[a-zA-Z0-9-_]+')->where('send', '1|0|true|false')->name('preview');
-        });
-
-
-        Route::get('welcome_user', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-            $mailable = new WelcomeUser(
-                mailBuilder: $mailBuilder,
-                dataBuilder: $dataBuilder
-                    ->setData(array_merge([
-                        'verification_link' => 'https://simtabi.com',
-                    ], $data))
-                    ->setData(['street' => '5th Ave', 'number' => '101'], 'user.details.address')
-                    ->setData(['phone' => '123-456-7890'], 'user.details.contact'),
-                errorBuilder: $errorBuilder
-            );
-
-            return (new MailSender(mailable: $mailable, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder))->sendEmail(queued: $queued, delay: $delay);
-
-        })->name('welcome_user');
-
-        Route::get('verify_email', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-            $mailable = new VerifyEmail(
-                mailBuilder: $mailBuilder,
-                dataBuilder: $dataBuilder->setData(array_merge([
-                    'verification_link' => 'https://simtabi.com',
-                ], $data)),
-                errorBuilder: $errorBuilder
-            );
-
-            return (new MailSender(mailable: $mailable, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder))->sendEmail(queued: $queued, delay: $delay);
-        })->name('verify_email');
-
-        Route::get('forgot_password', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-            $mailable = new ForgotPassword(
-                mailBuilder: $mailBuilder,
-                dataBuilder: $dataBuilder->setData(array_merge([
-                    'reset_link' => 'https://simtabi.com',
-                ], $data)),
-                errorBuilder: $errorBuilder
-            );
-
-            return (new MailSender(mailable: $mailable, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder))->sendEmail(queued: $queued, delay: $delay);
-        })->name('forgot_password');
-
-        Route::get('payment_confirmation', function () use ($mailBuilder, $dataBuilder, $errorBuilder, $queued, $delay, $data) {
-            $mailable = new PaymentConfirmation(
-                mailBuilder: $mailBuilder,
-                dataBuilder: $dataBuilder->setData(array_merge([
-                    'invoice_id'    => '407878364',
-                    'invoice_total' => '160.69',
-                    'download_link' => 'https://simtabi.com',
-                ], $data)),
-                errorBuilder: $errorBuilder
-            );
-
-            return (new MailSender(mailable: $mailable, mailBuilder: $mailBuilder, dataBuilder: $dataBuilder, errorBuilder: $errorBuilder))->sendEmail(queued: $queued, delay: $delay);
-        })->name('payment_confirmation');
-
-    });
-
-}
+    foreach ($templates as $name => [$mailable, $data]) {
+        Route::get($name, static fn (Request $request): Mailable|false => $preview($request, $mailable, [...$sample, ...$data]))->name($name);
+    }
+});

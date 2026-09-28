@@ -4,41 +4,31 @@ Thanks for helping improve `laranail/barua`.
 
 ## Getting set up
 
+Requires PHP `^8.4.1 || ^8.5`.
+
 ```bash
-composer install
+composer update
 composer lint
-composer test:stan
 composer test
-composer ci
 ```
 
-Requires PHP `^8.1|^8.2|^8.3`.
+`composer lint` runs Pint (the family's shared preset), PHPStan and Rector; `composer test` runs Pest.
+The debug pages' assets are built with `npm install && npm run build`, and `public/assets` is committed.
 
 ## What must pass
 
-- **Style**: `composer pint-fix` applies the Laravel Pint preset; `composer lint` checks it.
-- **Static analysis**: `composer test:stan` (PHPStan).
-- **Tests**: `composer test` (Pest).
-- **Everything**: `composer ci` runs the lot as CI does.
-
-## About this package
-
-**This package has no tests yet.** `composer test` runs Pest against an empty suite, so a green
-run proves nothing. A pull request that adds behaviour should add the first tests for it.
-
-It is also the family's outlier on versions: `illuminate/*` is still `^9.0|^10.0|^11.0` and PHP
-`^8.1`, where every other laranail package is on `^13.0` and PHP `^8.4.1`. Raising that is a
-breaking change and its own pull request, not something to slip into an unrelated one.
+- **Style**: `composer pint`; `composer pint-fix` applies it.
+- **Static analysis**: `composer phpstan`, with no baseline.
+- **Refactors**: `composer rector` reports none pending.
+- **Tests**: `composer test`. A change in behaviour comes with a test that fails without it.
 
 ## Pull requests
 
-Changes reach `main` through a pull request. CI runs on the pull request, not on a push to a
-branch, so a green tick means the change was gated rather than reported on after the fact.
+Changes reach `main` through a pull request, and `main` requires CI to pass. CI runs on the pull
+request: the suite on PHP 8.4 and 8.5 with lowest and stable dependencies and on Windows, static
+analysis, and the security audit.
 
-- Tests added or updated for new behaviour, where the package has a suite
-- `composer lint` clean
-- `CHANGELOG.md` updated under `## Unreleased` for anything user-facing
-- Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
+- `CHANGELOG.md` updated under `## [Unreleased]` for anything user-facing
 - No AI attribution anywhere: not in commits, PR titles or bodies, code comments or docs
 
 ## Security

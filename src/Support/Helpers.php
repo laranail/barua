@@ -1,63 +1,87 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Support;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\View;
+use stdClass;
 use Illuminate\Support\Str;
-use Simtabi\Laranail\Barua\Builders\DataBuilder;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Request;
 use Simtabi\Laranail\Barua\Enums\ViewType;
-use Simtabi\Laranail\Barua\Exceptions\BaruaException;
-use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
+use Simtabi\Laranail\Barua\Builders\DataBuilder;
 use Simtabi\Laranail\Barua\Builders\MailBuilder;
-use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
+use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
+use Simtabi\Laranail\Barua\Exceptions\BaruaException;
 
-class  Helpers
+final class Helpers
 {
+    /** The view and translation namespace: `view('laranail/barua::...')`. */
+    public const string VIEW_NAMESPACE = 'laranail/barua';
 
-    public const string NAMESPACE = 'barua';
+    /** The Blade component prefix: `<x-laranail-barua::text />`. Blade tags cannot hold a slash. */
+    public const string COMPONENT_PREFIX = 'laranail-barua';
 
-    public function __construct()
-    {
-        //
-    }
+    /** The config key the package registers under. */
+    public const string CONFIG_KEY = 'laranail.barua';
 
     public static function url(?string $path = null): string
     {
-        return rtrim(Request::getSchemeAndHttpHost(), '/') . (!empty($path) ? '/' . ltrim($path, '/') : '');
+        return rtrim(Request::getSchemeAndHttpHost(), '/') . (empty($path) ? '' : '/' . ltrim($path, '/'));
     }
 
     public static function isDevModeEnable(): bool
     {
-        return config('laranail.barua.dev_mode', false);
+        return (bool) config(self::CONFIG_KEY . '.dev_mode', false);
     }
 
     public static function isSendMailEnabled(): bool
     {
-        return config('laranail.barua.enable_send_mail', true);
+        return (bool) config(self::CONFIG_KEY . '.enable_send_mail', true);
     }
 
     public static function isThrowErrors(): bool
     {
-        return config('laranail.barua.throw_errors', false);
+        return (bool) config(self::CONFIG_KEY . '.throw_errors', false);
     }
 
-    public static function getDefaultMaximumFileSize(): bool
+    public static function isCssInliningEnabled(): bool
     {
-        return config('laranail.barua.max_file_size', false);
+        return (bool) config(self::CONFIG_KEY . '.inline_css', true);
     }
 
+    /**
+     * The configured maximum attachment size, in bytes; 0 when unset or unreadable.
+     */
+    public static function getDefaultMaximumFileSize(): int
+    {
+        $size = self::humanReadableToBytes((string) config(self::CONFIG_KEY . '.max_file_size', ''));
+
+        return $size === false ? 0 : (int) $size;
+    }
+
+    /**
+     * @return list<string>
+     */
     public static function getAllowedMimeTypes(): array
     {
-        return config('laranail.barua.allowed_mime_types', []);
+        $types = config(self::CONFIG_KEY . '.allowed_mime_types', []);
+
+        if (is_string($types)) {
+            $types = TextFormatter::text2array($types);
+        }
+
+        return array_values(array_map(
+            static fn (mixed $type): string => strtolower(trim((string) $type)),
+            array_filter((array) $types, static fn (mixed $type): bool => is_string($type) && trim($type) !== ''),
+        ));
     }
 
-    public static function getSender(): object
+    public static function getSender(): stdClass
     {
-        $data = config('laranail.barua.sender', []);
+        $data = (array) config(self::CONFIG_KEY . '.sender', []);
 
         return (object) [
             'email' => $data['email'] ?? null,
@@ -66,291 +90,173 @@ class  Helpers
     }
 
     /**
+     * @return class-string<Model>
+     *
      * @throws BaruaException
      */
-    public static function getUserModel(): Model|string
+    public static function getUserModel(): string
     {
-
-        // Retrieve the user class from the configuration.
-        $configKey = 'laranail.barua.user_class';
+        $configKey = self::CONFIG_KEY . '.user_class';
         $userClass = config($configKey);
 
-        // Ensure the class name is retrieved and is a string.
-        if (is_string($userClass)) {
-            // Check if the class exists.
-            if (class_exists($userClass)) {
-                // Verify the class is indeed an Eloquent model.
-                // This is a more reliable check if you specifically want to ensure it's an Eloquent model.
-                if (new $userClass instanceof Model) {
-                    // The class exists and is an Eloquent model, so proceed with your logic.
-                    return $userClass;
-                } else {
-                    // The class does not extend Eloquent Model.
-                    throw new BaruaException("The configured class {$userClass} is not an Eloquent model.");
-                }
-            } else {
-                // The class does not exist.
-                throw new BaruaException("The configured class {$userClass} does not exist.");
-            }
-        } else {
-            // Configuration is not set or not a string.
+        if (! is_string($userClass) || $userClass === '') {
             throw new BaruaException("The '{$configKey}' configuration is not set or not a valid class name.");
         }
 
+        if (! class_exists($userClass)) {
+            throw new BaruaException("The configured class {$userClass} does not exist.");
+        }
+
+        if (! is_subclass_of($userClass, Model::class)) {
+            throw new BaruaException("The configured class {$userClass} is not an Eloquent model.");
+        }
+
+        return $userClass;
     }
 
     /**
-     * Update the namespace in all PHP files within a given directory.
-     *
-     * @param  string $directory The directory to scan.
-     * @param  string $oldNamespace The old namespace to be replaced.
-     * @param  string $newNamespace The new namespace to replace with.
-     * @return array
+     * @return array{path: string, name: string, mime: string|false, size: int|false}
      */
-    public static function updateNamespaceInDirectory(string $directory, string $oldNamespace, string $newNamespace): array
-    {
-        $updated = null;
-        $skipped = null;
-        $data    = [];
-
-        try {
-
-            // Check if the directory exists
-            if (!File::exists($directory)) {
-                $data['errors'][] = "The directory does not exist: {$directory}";
-            }
-
-            // Check if the directory is not empty
-            if (empty(File::files($directory))) {
-                $data['errors'][] = "The directory is empty: {$directory}";
-            }
-
-            if (!empty($data['errors'])) {
-                foreach (File::allFiles($directory) as $file) {
-                    $filePath = $file->getRealPath();
-                    $content = File::get($filePath);
-
-                    // Check if the file contains the old namespace
-                    if (str_contains($content, $oldNamespace)) {
-                        // Replace the old namespace with the new namespace
-                        $updatedContent = str_replace($oldNamespace, $newNamespace, $content);
-
-                        // Save the updated content back to the file
-                        File::put($filePath, $updatedContent);
-
-                        $data['updated'][] = $filePath;
-                    } else {
-                        $data['skipped'][] = $filePath;
-                    }
-                }
-            }
-
-            $array2string = function (array $data, string $key) {
-                $array = $data[trim($key)] ?? null;
-                if (!empty($array) && is_array($array)) {
-                    $array = implode(',', $array);
-                }
-                return $array;
-            };
-
-            $updated = $array2string($data, 'updated');
-            $skipped = $array2string($data, 'skipped');
-
-        } catch (DirectoryNotFoundException $e) {
-            // Handle the exception
-        }
-
-        return [
-            'errors'  => $data['errors']  ?? [],
-            'updated' => "Updated namespace in [{$updated}]",
-            'skipped' => "Skipped [{$skipped}], does not contain the old namespace.",
-        ];
-    }
-
     public static function getFileInfo(string $path): array
     {
-
         return [
             'path' => $path,
             'name' => basename($path),
-            'mime' => mime_content_type($path),
-            'size' => filesize($path),
+            'mime' => is_file($path) ? mime_content_type($path) : false,
+            'size' => is_file($path) ? filesize($path) : false,
         ];
     }
 
-    public static function humanReadableToBytes(string $size): float|bool
+    /**
+     * "12MB", "1.5 GB", "2048" (bytes) and so on, to bytes; false for anything else.
+     */
+    public static function humanReadableToBytes(string $size): float|false
     {
-        // Define the unit multipliers in powers of 1024
         $unitMultipliers = [
             'B'  => 1,
             'KB' => 1024,
-            'MB' => pow(1024, 2),
-            'GB' => pow(1024, 3),
-            'TB' => pow(1024, 4),
-            'PB' => pow(1024, 5),
-            'EB' => pow(1024, 6),
-            'ZB' => pow(1024, 7),
-            'YB' => pow(1024, 8),
+            'MB' => 1024 ** 2,
+            'GB' => 1024 ** 3,
+            'TB' => 1024 ** 4,
+            'PB' => 1024 ** 5,
+            'EB' => 1024 ** 6,
+            'ZB' => 1024 ** 7,
+            'YB' => 1024 ** 8,
         ];
 
-        // Remove spaces and convert to uppercase for uniformity
         $size = strtoupper(str_replace(' ', '', $size));
 
-        // Check if the size is purely numeric, which means it's already in bytes
         if (is_numeric($size)) {
             return (float) $size;
         }
 
-        // Extract the numeric value and unit from the size string if not purely numeric
-        if (preg_match('/([0-9.]+)([A-Z]+)/', $size, $matches)) {
-            $value = (float) $matches[1];
-            $unit  = $matches[2];
-
-            // Calculate and return the size in bytes
-            if (isset($unitMultipliers[$unit])) {
-                return $value * $unitMultipliers[$unit];
-            }
+        if (preg_match('/^([0-9.]+)([A-Z]+)$/', $size, $matches) && isset($unitMultipliers[$matches[2]])) {
+            return (float) $matches[1] * $unitMultipliers[$matches[2]];
         }
 
-        // Return false if the format is not recognized
         return false;
     }
 
+    /**
+     * @param array<array-key, string>|string $allowedMimeTypes
+     */
     public static function isValidMimeType(string $mimeType, array|string $allowedMimeTypes): bool
     {
-        // Normalize the input to lower case for case-insensitive comparison
         $mimeType = strtolower($mimeType);
 
-        // Ensure $allowedTypes is an array to accommodate multiple MIME types
         if (is_string($allowedMimeTypes)) {
             $allowedMimeTypes = TextFormatter::text2array($allowedMimeTypes);
         }
 
-        if (empty($allowedMimeTypes)) {
-            return false; // No allowed MIME types
-        }
-
         foreach ($allowedMimeTypes as $type) {
-            $type = strtolower($type); // Normalize allowed type to lower case
+            $type = strtolower($type);
 
-            // Check if the input matches an allowed MIME type or subtype
-            if (($mimeType === $type) || str_contains($type, "/$mimeType") || ("application/$mimeType" === $type)) {
-                return true; // Valid MIME type
+            if ($mimeType === $type || str_contains($type, "/{$mimeType}") || "application/{$mimeType}" === $type) {
+                return true;
             }
         }
 
-        return false; // No valid MIME type found
+        return false;
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     * @param list<string> $keys
+     * @param array<array-key, mixed> $value
+     *
+     * @return array<array-key, mixed>
+     */
     public static function setNestedData(array $data, array $keys, array $value): array
     {
-        if (empty($keys)) {
-            // If no more keys, merge the value
+        if ($keys === []) {
             return array_merge($data, $value);
         }
 
         $key = array_shift($keys);
-        if (!isset($data[$key]) || !is_array($data[$key])) {
+
+        if (! isset($data[$key]) || ! is_array($data[$key])) {
             $data[$key] = [];
         }
 
-        // Recurse into the next level
         $data[$key] = self::setNestedData($data[$key], $keys, $value);
 
         return $data;
     }
 
-    /**
-     * Check if a given Blade file exists in a package namespace.
-     *
-     * @param string $view The view name, including the package namespace (e.g., 'package::view.name').
-     * @return bool True if the view exists, false otherwise.
-     */
     public static function bladeFileExists(string $view): bool
     {
         return View::exists($view);
     }
 
     /**
-     * Attach files with automatic MIME type detection and optional renaming to the mail.
-     *
-     * @param Mailable $email
-     * @param MailBuilder $builderService
-     * @return Mailable
+     * Attach the builder's files to the mailable.
      */
     public static function addAttachmentToMail(Mailable $email, MailBuilder $builderService): Mailable
     {
-        $attachments = $builderService->getAttachments();
-        if (is_array($attachments) && !empty($attachments)) {
-            foreach ($attachments as $attachment) {
-                $mime = $attachment['mime'] ?? null;
-                $name = $attachment['name'] ?? Str::slug($mime . "-" . time() . "-" . rand(0, 9999));
-                $path = $attachment['path'] ?? null;
-
-                if (!empty($name) || !empty($path) || !empty($mime)) {
-                    $email->attach($path, [
-                        'mime' => $mime,
-                        'as'   => $name,
-                    ]);
-                }
-
-            }
+        foreach ($builderService->getAttachments() as $attachment) {
+            $email->attach($attachment['path'], [
+                'mime' => $attachment['mime'],
+                'as'   => $attachment['name'] ?: Str::slug($attachment['mime'] . '-' . time()),
+            ]);
         }
 
         return $email;
     }
 
     /**
-     * Add a view to the email.
+     * Render the builder's view into the mailable as HTML, Markdown or plain text.
      *
-     * @param MailBuilder $mailBuilder
-     * @param Mailable $mailable
-     * @param ErrorBuilder $errorBuilder
-     * @param string $className
-     * @param ViewType|null $viewType
-     * @param DataBuilder $dataBuilder
-     * @return Mailable|bool
      * @throws BaruaException
      */
-    public static function addView(MailBuilder $mailBuilder, Mailable $mailable, ErrorBuilder $errorBuilder, string $className, ?ViewType $viewType, DataBuilder $dataBuilder): Mailable|bool
+    public static function addView(MailBuilder $mailBuilder, Mailable $mailable, ErrorBuilder $errorBuilder, string $className, ?ViewType $viewType, DataBuilder $dataBuilder): Mailable|false
     {
-        if (!$viewType instanceof ViewType) {
+        if (! $viewType instanceof ViewType) {
             $errorBuilder->setErrors("A valid 'View Type' is required for the {$className}.", 'view');
+
             return false;
         }
 
-        // Get the view type
-        $viewType = $viewType->getType();
-        $view     = $mailBuilder->getView();
+        $view = $mailBuilder->getView();
 
-        // Check if the view file exists
         if (empty($view)) {
             $errorBuilder->setErrors("A valid 'View' file is required for the {$className}.", 'view');
+
             return false;
         }
 
-        // Get the data to be passed to the view
         $data = $dataBuilder->getData();
 
-        // Add the view to the mailable
-        if (ViewType::MARKDOWN->value === $viewType) {
-            $view = $mailable->markdown($view, $data);
-        } elseif (ViewType::HTML->value === $viewType) {
-            $view = $mailable->view($view, $data);
-        } elseif (ViewType::TEXT->value === $viewType) {
-            $view = $mailable->text($view, $data);
-        } else {
-            $errorBuilder->setErrors("Invalid view type '{$viewType}' for the {$className}.", 'view');
-            return false;
-        }
+        $mailable = match ($viewType) {
+            ViewType::MARKDOWN => $mailable->markdown($view, $data),
+            ViewType::HTML     => $mailable->view($view, $data),
+            ViewType::TEXT     => $mailable->text($view, $data),
+        };
 
-        // Add the attachments to the email
-        return self::addAttachmentToMail(email: $view, builderService: $mailBuilder);
+        return self::addAttachmentToMail(email: $mailable, builderService: $mailBuilder);
     }
 
     public static function getViewPath(string $path): string
     {
-        return Helpers::NAMESPACE . "::{$path}";
+        return self::VIEW_NAMESPACE . "::{$path}";
     }
-
 }
