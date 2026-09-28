@@ -1,22 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\View\Components;
 
 use Illuminate\View\Component;
+use Simtabi\Laranail\Barua\Support\Helpers;
 
 abstract class BaseComponent extends Component
 {
-
-    protected string $namespace = 'barua';
-
-    public function __construct()
-    {
-        //
-    }
-
     public function getViewPath(string $view): string
     {
-        return ($this->namespace . '::components.' . trim($view));
+        return Helpers::getViewPath('components.' . trim($view));
     }
-
 }

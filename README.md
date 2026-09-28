@@ -1,191 +1,62 @@
-<div align="center">
-   <img src=".github/assets/banner.png" alt="Barua Banner" style="width: 100%; height: auto; border-radius: 8px; margin: 10px auto;">
-   <br />
-</div>
+# laranail/barua
 
-<div align="center">
-   <strong>Barua</strong>
-</div>
-<div align="center">
-<p>
-The next generation of writing emails.<br />High-quality, un-styled components for creating emails.
-</p>
-</div>
-<div align="center">
-   <a href="https://simtabi.com">Website</a> 
-   <span> · </span>
-   <a href="https://github.com/laranail/barua">GitHub</a> 
-   <span> · </span>
-   <a href="https://simtabi.com/discord">Discord</a>
-</div>
+[![Tests](https://github.com/laranail/barua/actions/workflows/tests.yml/badge.svg)](https://github.com/laranail/barua/actions/workflows/tests.yml)
+[![Static analysis](https://github.com/laranail/barua/actions/workflows/static-analysis.yml/badge.svg)](https://github.com/laranail/barua/actions/workflows/static-analysis.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+`laranail/barua` is not on Packagist, so there is no registry-version badge to show; [Install](#install) covers the VCS route.
 
+> Responsive, un-styled Blade email components and a fluent mail builder for Laravel.
 
+Targets PHP `^8.4.1 || ^8.5` on Laravel `^13.0`. Built on `laranail/package-tools`.
 
-<hr>
+## Install
 
-# Table of Contents
-1. [Introduction](#introduction)
-2. [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation-and-configuration)
-3. [Email Components](docs/email-components.md)
-6. [License](#license)
-7. [Changelog](#changelog)
-8. [Contributing](#contributing)
-9. [Security](#security)
-10. [Support](#support)
-11. [Contributors](#contributors)
-12. [Authors](#authors)
-13. [License](#license)
+Add the VCS repositories (the laranail family does not resolve through Packagist), then require the package:
 
-
-<br>
-<hr>
-
-
-## Introduction
-
-The purpose of this package is to offer convenient mechanisms for creating and sending responsive and visually appealing emails. It includes un-styled components at its core, allowing for more tailored and personalized design customization.
-
----
-
-## Getting Started
-
-This section will walk you through the initial setup and basic usage of this package, ensuring you can quickly begin creating and sending responsive emails with the available fluent API and customizable components.
-
----
-
-## Prerequisites
-
-Before installing this package, make sure that your system meets the following requirements:
-
-- PHP >= 8.2 (or newer) installed on your system.
-- Laravel 9.x or newer installed on your system.
-- Composer for managing dependencies.
-
-## Installation and Configuration
-
-1. **Install the Package via Composer**
-
-To install the package, run the following command in your Laravel project directory:
+```json
+"repositories": [
+    { "type": "vcs", "url": "https://github.com/laranail/barua" },
+    { "type": "vcs", "url": "https://github.com/laranail/package-tools" }
+]
+```
 
 ```bash
-composer require --dev laranail/barua
+composer require laranail/barua
 ```
 
-2. **Publish package files (Optional)**
-
-Run the following commands to publish the package assets, configuration, and template files to your Laravel application for further customization.
-
-a. **Publish package Service Provider**
-```bash
-php artisan vendor:publish --provider=Simtabi\Laranail\Barua\Providers\BaruaServiceProvider // to publish the service provider
+```blade
+<x-laranail-barua::text>Hello from barua.</x-laranail-barua::text>
 ```
 
-b. **Publish specific files using the following tags per your needs:**
-```php
-php artisan vendor:publish --tag=barua::blade-component-classes     // to copy blade component classes            
-php artisan vendor:publish --tag=barua::blade-components            // to copy blade components view files                         
-php artisan vendor:publish --tag=barua::blade-templates             // to copy all blade template files                           
-php artisan vendor:publish --tag=barua::config                      // to copy config files                                    
-php artisan vendor:publish --tag=barua::lang                        // to copy lang files                      
-php artisan vendor:publish --tag=barua::mail-template-classes       // to copy mail template classes to the default app/Mail directory                       
-php artisan vendor:publish --tag=barua::public-assets               // to copy public assets files to the public directory
-```
+## <a name="documentation"></a>Documentation
 
-Alternatively, you can manually copy the files yourself to your Laravel application.
+Full documentation is at **[opensource.simtabi.com/documentation/laranail/barua](https://opensource.simtabi.com/documentation/laranail/barua/)**.
 
-```bash
-/config/* 
-/database/*
-/resources/assets/*
-/resource/lang/*
-/resources/views/*
-/src/Mail/Templates/*
-```
+### Guides
 
-# Configuration
-Optionally, add the following configuration options to change the package's default behavior:
+- [Installation](docs/installation.md): requirements, VCS setup, publish tags
+- [Getting started](docs/getting-started.md): write an email with the components and send it
+- [Configuration](docs/configuration.md): every key under `laranail.barua`
+- [Architecture](docs/architecture.md): the components, builders, sender and events, and why
+- [Upgrading](docs/upgrading.md): what changed with the family conventions
+- [Release](docs/release.md): how versions are cut and consumed
 
-1. **Environment Configuration**
+### Reference
 
-```dotenv
-# this option exposes the package's default routes for testing purposes
- BARUA_ENABLE_DEV_MODE=true
-# this option enables the package to throw exceptions when errors occur
- BARUA_ENABLE_ERROR_THROWING=true
-# this option sets the maximum file size for attachments
- BARUA_MAX_FILE_SIZE="5mb"
-# this option sets the allowed MIME types for attachments
- BARUA_ALLOWED_MIME_TYPES="application/pdf,image/jpeg,image/png,"
-```
-2. **Package**
-   You can publish the package configuration file located at `` config/barua.php `` to make changes to the default settings.
+- [Components](docs/tools/components.md) · [Mail builder](docs/tools/mail-builder.md) · [Mail sender](docs/tools/mail-sender.md)
+- [Bundled templates](docs/tools/templates.md) · [Events](docs/tools/events.md) · [CSS inlining](docs/tools/css-inliner.md) · [Debug pages](docs/tools/debug-pages.md)
 
-3. **Language**
-   You can publish the package language file located at `` /resources/lang/en/barua.php `` to make changes to the default language values.
+### Recipes
 
-4. **Mail**
-   The application will use the default Laravel mail configuration settings to send emails, as you have already set up in your Laravel application's environment file or as stored in the database.
+- [Send a bundled template](docs/recipes/send-a-bundled-template.md) · [Build a custom email](docs/recipes/build-a-custom-email.md) · [Add an attachment](docs/recipes/add-an-attachment.md)
+- [Queue an email](docs/recipes/queue-an-email.md) · [Preview templates locally](docs/recipes/preview-templates-locally.md)
+- [Publish and customise the views](docs/recipes/publish-and-customise-views.md) · [Inline your own stylesheet](docs/recipes/inline-your-own-stylesheet.md)
 
-```php
-'from' => [
-    'email' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-    'name'   => env('MAIL_FROM_NAME', 'Example'),
-],
-```
-6. **View Templates &amp; Components**
-   The package comes with a collection of Blade components that are un-styled by default, enabling you to design your email templates from scratch. If you prefer, you can also utilize your own pre-made HTML templates.
+## Contributing & security
 
-These Blade components, supplied by the package, are designed to be both responsive and customizable, facilitating the creation of attractive emails. These components can be employed to create a range of email templates, from straightforward text-based messages to more intricate layouts incorporating images and links.
+Issues and PRs are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md). Participation follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-You can find these components in the `resources/views/emails` or `resources/views/vendor/barua` directories once they've been published, and they can be easily tailored to meet your requirements.
+## License
 
-You're encouraged to modify the provided templates/components to align with your specific needs, including any particular commands, configuration specifics, or features that should be made known to users from the outset.
-
----
-
-## Compatibility
-All blade components were tested and found to be compatible with the following email clients:
-
-| <img src=".github/assets/icons/gmail.svg" width="48px" height="48px" alt="Gmail logo"> | <img src=".github/assets/icons/apple-mail.svg" width="48px" height="48px" alt="Apple Mail"> | <img src=".github/assets/icons/outlook.svg" width="48px" height="48px" alt="Outlook logo"> | <img src=".github/assets/icons/yahoo-mail.svg" width="48px" height="48px" alt="Yahoo! Mail logo"> | <img src=".github/assets/icons/hey.svg" width="48px" height="48px" alt="HEY logo"> | <img src=".github/assets/icons/superhuman.svg" width="48px" height="48px" alt="Superhuman logo"> |
-| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Gmail ✔                                                                                           | Apple Mail ✔                                                                                           | Outlook ✔                                                                                             | Yahoo! Mail ✔                                                                                                | HEY ✔                                                                                         | Superhuman ✔                                                                                                |
-
-## Development
-
-#### Install dependencies
-
-```bash
-composer install
-```
-
-#### Tests
-```sh
-composer ci
-```
-
-<br>
-<hr>
-
-### Changelog
-Please see [CHANGELOG](./.github/docs/CHANGELOG.md) for more information on what has changed recently.
-
-### Contributing
-Please see [CONTRIBUTING](./.github/docs/CONTRIBUTING.md) for details.
-
-### Security
-Please see [SECURITY](./.github/docs/SECURITY.md) for details.
-
-### Support
-Please see [Support and Community](./.github/docs/SUPPORT.md) for details.
-
-### Contributors
-Please see [CONTRIBUTORS](./.github/docs/CONTRIBUTORS.md) for details.
-
-### Authors
-- Imani ([@imanimanyara](https://twitter.com/imanimanyara))
-
-### License
-Open-sourced software licensed under the MIT license. Please see [LICENSE](./.github/docs/LICENSE) for details.
+MIT © Simtabi LLC. See [LICENSE](LICENSE).

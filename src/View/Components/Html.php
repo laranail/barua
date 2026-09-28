@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\View\Components;
 
@@ -12,10 +14,8 @@ class Html extends BaseComponent
      */
     public function __construct(
         public readonly string $lang = 'en',
-        public readonly string $dir = 'ltr'
-    ) {
-        parent::__construct();
-    }
+        public readonly string $dir = 'ltr',
+    ) {}
 
     /**
      * Get the view / contents that represent the component.

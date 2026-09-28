@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\View\Components;
 
@@ -19,43 +21,29 @@ class Heading extends BaseComponent
         public readonly string|int $mr = '',
         public readonly string|int $mb = '',
         public readonly string|int $ml = '',
-    ) {
-        parent::__construct();
-    }
+    ) {}
 
-    public function withMargin(array $props)
+    /**
+     * @param array<string, string|int> $props
+     */
+    public function withMargin(array $props): string
     {
-        $nonEmptyStyles = array_merge(
-            $this->withSpace($props['m'], ['margin']),
-            $this->withSpace($props['mx'], ['margin-left', 'margin-right']),
-            $this->withSpace($props['my'], ['margin-top', 'margin-bottom']),
-            $this->withSpace($props['mt'], ['margin-top']),
-            $this->withSpace($props['mr'], ['margin-right']),
-            $this->withSpace($props['mb'], ['margin-bottom']),
-            $this->withSpace($props['ml'], ['margin-left'])
+        // Later keys win, so `mt` overrides the top half of `my`, which overrides `m`.
+        $styles = array_merge(
+            $this->withSpace($props['m'] ?? '', ['margin']),
+            $this->withSpace($props['mx'] ?? '', ['margin-left', 'margin-right']),
+            $this->withSpace($props['my'] ?? '', ['margin-top', 'margin-bottom']),
+            $this->withSpace($props['mt'] ?? '', ['margin-top']),
+            $this->withSpace($props['mr'] ?? '', ['margin-right']),
+            $this->withSpace($props['mb'] ?? '', ['margin-bottom']),
+            $this->withSpace($props['ml'] ?? '', ['margin-left']),
         );
 
-        $mergedStyles = [];
-
-        foreach ($nonEmptyStyles as $style) {
-            $mergedStyles = array_merge($mergedStyles, $style);
-        }
-
-        return implode(';', $mergedStyles);
-    }
-
-    protected function withSpace(string $value, array $properties): array
-    {
-        $styles = [];
-
-        foreach ($properties as $property) {
-            // Check to ensure the value is a valid number
-            if (is_numeric($value)) {
-                $styles[$property] = $value.'px';
-            }
-        }
-
-        return $styles;
+        return implode(';', array_map(
+            static fn (string $property, string $value): string => "{$property}:{$value}",
+            array_keys($styles),
+            $styles,
+        ));
     }
 
     /**
@@ -64,5 +52,24 @@ class Heading extends BaseComponent
     public function render(): View|Closure|string
     {
         return view($this->getViewPath('heading'));
+    }
+
+    /**
+     * @param list<string> $properties
+     *
+     * @return array<string, string>
+     */
+    protected function withSpace(string|int $value, array $properties): array
+    {
+        $styles = [];
+
+        foreach ($properties as $property) {
+            // Check to ensure the value is a valid number
+            if (is_numeric($value)) {
+                $styles[$property] = $value . 'px';
+            }
+        }
+
+        return $styles;
     }
 }

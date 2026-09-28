@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Simtabi\Laranail\Barua\Barua;
+use Illuminate\Support\Facades\Facade;
 
 class BaruaFacade extends Facade
 {

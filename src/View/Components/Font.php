@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Simtabi\Laranail\Barua\View\Components;
 
@@ -9,6 +11,9 @@ class Font extends BaseComponent
 {
     /**
      * Create a new component instance.
+     *
+     * @param string|list<string> $fallbackFontFamily
+     * @param array{url?: string, format?: string} $webFont
      */
     public function __construct(
         public readonly string $fontFamily,
@@ -19,10 +24,8 @@ class Font extends BaseComponent
         ],
         public readonly array $webFont = [],
         public readonly string $fontStyle = 'normal',
-        public readonly int $fontWeight = 400
-    ) {
-        parent::__construct();
-    }
+        public readonly int $fontWeight = 400,
+    ) {}
 
     /**
      * Get the view / contents that represent the component.
