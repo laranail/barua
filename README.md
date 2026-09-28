@@ -55,7 +55,7 @@ Full documentation is at **[opensource.simtabi.com/documentation/laranail/barua]
 
 ## Contributing & security
 
-Issues and PRs are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md). Participation follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+Issues and PRs are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Report vulnerabilities privately per [SECURITY.md](SECURITY.md). Participation follows the laranail [Code of Conduct](https://github.com/laranail/.github/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
