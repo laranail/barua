@@ -29,7 +29,19 @@ composer require laranail/barua
 <x-laranail-barua::text>Hello from barua.</x-laranail-barua::text>
 ```
 
-## Quick start
+## Quick start guide and usage
+
+### Getting started
+
+1. Nothing to register: the service provider is discovered automatically.
+2. barua sends through your application's own mail configuration, so set the mailer and `MAIL_FROM_ADDRESS` / `MAIL_FROM_NAME` in `.env` as you would for any Laravel mail.
+3. Optionally, publish the config to change a default:
+
+   ```bash
+   php artisan vendor:publish --tag=laranail::barua-config
+   ```
+
+### Usage
 
 ```blade
 {{-- resources/views/emails/receipt.blade.php --}}
@@ -42,6 +54,24 @@ composer require laranail/barua
         </x-laranail-barua::container>
     </x-laranail-barua::body>
 </x-laranail-barua::html>
+```
+
+Send one of the bundled messages with the builders and `MailSender`:
+
+```php
+use Simtabi\Laranail\Barua\Builders\DataBuilder;
+use Simtabi\Laranail\Barua\Builders\ErrorBuilder;
+use Simtabi\Laranail\Barua\Builders\MailBuilder;
+use Simtabi\Laranail\Barua\Mail\Messages\Onboarding\WelcomeUser;
+use Simtabi\Laranail\Barua\Services\MailSender;
+
+$errors  = new ErrorBuilder();
+$data    = (new DataBuilder())->setData(['name' => $user->name, 'companyName' => 'Acme', 'verification_link' => $verificationUrl]);
+$builder = (new MailBuilder(errorBuilder: $errors))->setTo($user->email, $user->name);
+$mail    = new WelcomeUser(mailBuilder: $builder, dataBuilder: $data, errorBuilder: $errors);
+
+(new MailSender(mailable: $mail, mailBuilder: $builder, dataBuilder: $data, errorBuilder: $errors))
+    ->sendEmail(queued: true);
 ```
 
 The full walkthrough is in [Getting started](docs/getting-started.md); everything else is in the [documentation index](#documentation).
