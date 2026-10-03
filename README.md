@@ -29,6 +29,23 @@ composer require laranail/barua
 <x-laranail-barua::text>Hello from barua.</x-laranail-barua::text>
 ```
 
+## Quick start
+
+```blade
+{{-- resources/views/emails/receipt.blade.php --}}
+<x-laranail-barua::html lang="en">
+    <x-laranail-barua::body style="background-color: #f6f9fc;">
+        <x-laranail-barua::container style="background-color: #ffffff; padding: 32px;">
+            <x-laranail-barua::heading as="h1" mb="16">Thanks, {{ $name }}</x-laranail-barua::heading>
+            <x-laranail-barua::text>Your order {{ $orderId }} is on its way.</x-laranail-barua::text>
+            <x-laranail-barua::link href="{{ $trackingUrl }}">Track it</x-laranail-barua::link>
+        </x-laranail-barua::container>
+    </x-laranail-barua::body>
+</x-laranail-barua::html>
+```
+
+The full walkthrough is in [Getting started](docs/getting-started.md); everything else is in the [documentation index](#documentation).
+
 ## <a name="documentation"></a>Documentation
 
 Full documentation is at **[opensource.simtabi.com/documentation/laranail/barua](https://opensource.simtabi.com/documentation/laranail/barua/)**.
