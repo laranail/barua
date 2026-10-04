@@ -59,3 +59,5 @@ The first `v0.1.0` (2026-09-01) described itself as adding a `Barua` facade and 
 through `pelago/emogrifier`, events and jobs for queued delivery, and SVG support through
 `jamesbwi/blade-svg`. The facade, builder and events existed; the inlining never used emogrifier,
 the job was empty, and the SVG package was never called.
+
+[Unreleased]: https://github.com/laranail/barua/compare/v0.1.0...HEAD
