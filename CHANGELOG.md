@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `require` declares what `src/` uses directly: `illuminate/bus` and `illuminate/queue`
+  (`MailBase`), `illuminate/config` and `illuminate/container` (`config()`, `app()`), and
+  `laravel/framework`, for `Illuminate\Foundation\Bus\Dispatchable` and
+  `Illuminate\Foundation\Events\Dispatchable` and the `public_path()` helper, none of which has a
+  split package. `laravel/framework` replaces every `illuminate/*` split, so an application installs nothing
+  new. `tests/Unit/DeclaredRequirementsTest.php` now fails when `src/` uses an Illuminate component,
+  facade or global helper that `require` does not name.
+
 ## [0.1.0] - 2026-09-28
 
 Responsive, un-styled Blade email components and a fluent mail builder for Laravel. This version
