@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   new. `tests/Unit/DeclaredRequirementsTest.php` now fails when `src/` uses an Illuminate component,
   facade or global helper that `require` does not name.
 
+### Fixed
+
+- **Windows CI installs the current PHP patch.** setup-php reused the PHP the Windows image
+  ships (8.5.11) after 8.5.12 fixed a security issue, so `roave/security-advisories` refused
+  to install and every pull request failed its Windows legs. The step now passes
+  sets setup-php's `update` (an environment variable) off Linux, so it upgrades to the latest patch.
+
 ## [0.1.0] - 2026-09-28
 
 Responsive, un-styled Blade email components and a fluent mail builder for Laravel. This version
