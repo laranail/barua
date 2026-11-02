@@ -8,7 +8,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
-    "glob": "^13.0.6",
+    "glob": "^14.0.3",
     "laravel-vite-plugin": "^3.2",
     "postcss": "^8.4.38",
     "postcss-custom-properties": "^15.0.1",
